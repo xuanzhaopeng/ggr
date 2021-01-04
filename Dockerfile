@@ -1,7 +1,14 @@
 FROM alpine:3.12
 
-RUN apk add -U tzdata ca-certificates && rm -Rf /var/cache/apk/*
+ENV PASSWORD=test \
+    DATA="<qa:browsers xmlns:qa=\"urn:config.gridrouter.qatools.ru\"></qa:browsers>"
+
+RUN apk add -U tzdata ca-certificates apache2-utils curl && rm -Rf /var/cache/apk/*
 COPY ggr /usr/bin
+COPY scripts/entry.sh /etc/grid-router/entry.sh
+RUN chmod +x /etc/grid-router/entry.sh
+RUN mkdir -p /etc/grid-router/quota
 
 EXPOSE 4444
-ENTRYPOINT ["/usr/bin/ggr", "-listen", ":4444", "-users", "/etc/grid-router/users.htpasswd", "-quotaDir", "/etc/grid-router/quota"]
+
+ENTRYPOINT ["/etc/grid-router/entry.sh"]
